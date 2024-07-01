@@ -50,6 +50,26 @@ app.post('/api/notes', (req, res) => {
     });
 });
 
+app.delete('/api/notes/:id', (req, res) => {
+    const noteId = req.params.id;
+
+    fs.readFile(path.join(__dirname, 'db', 'db.json'), 'utf8', (err, data) => {
+        if (err) {
+            res.status(500).json({ error: 'Failed to read notes' });
+        } else {
+            let notes = JSON.parse(data);
+            notes = notes.filter(note => note.id !== noteId);
+            fs.writeFile(path.join(__dirname, 'db', 'db.json'), JSON.stringify(notes, null, 2), (err) => {
+                if (err) {
+                    res.status(500).json({ error: 'Failed to save notes' });
+                } else {
+                    res.json({ message: `Note with id ${noteId} deleted` });
+                }
+            });
+        }
+    });
+});
+
 // Wild card route
 app.get('*', (req, res) =>
     res.sendFile(path.join(__dirname, '/public/index.html'))
